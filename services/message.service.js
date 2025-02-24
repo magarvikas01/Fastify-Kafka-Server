@@ -9,16 +9,17 @@ class MessageService {
   
     async sendMessage(message, topic = 'messages') {
       try {
-    
+        console.log('Sending message to Kafka:', message); 
+
         const result = await this.kafkaProducer.send({
           topic,
           messages: [{ 
             value: JSON.stringify(message),
             timestamp: Date.now().toString()
           }],
-          
         });
 
+        // console.log('Message sent successfully:', result); // Add logging
         return { 
           success: true, 
           message: 'Message sent to Kafka',
