@@ -77,7 +77,36 @@ services:
       - kafka-net
     restart: unless-stopped
 
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8087:8086"  # Changed to 8087 to avoid conflicts
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=smartship
+      - DOCKER_INFLUXDB_INIT_PASSWORD=smartship123
+      - DOCKER_INFLUXDB_INIT_ORG=smartship-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=kafka-data
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-token
+      - DOCKER_INFLUXDB_INIT_RETENTION=1w
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_DESCRIPTION="Admin token for Kafka integration"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2:rw
+    networks:
+      - kafka-net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8086/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 networks:
   kafka-net:
     name: kafka-net
     driver: bridge
+
+volumes:
+  influxdb-data:
+    name: influxdb-data
